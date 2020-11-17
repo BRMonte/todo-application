@@ -3,10 +3,17 @@ class Api::V1::TodoItemsController < ApplicationController
   before_action :set_todo_item, only: [:show, :edit, :update, :destroy]
 
   def index
-    @todo_items = TodoItem.all
+    @todo_items = current_user.todo_items.all
   end
 
   def show
+    if authorized?
+      respond_to do |format|
+        format.json { render :show }
+      end
+    else
+      handle_unauthorized
+    end
   end
 
   def create
@@ -28,7 +35,7 @@ class Api::V1::TodoItemsController < ApplicationController
       @todo_item.user == current_user
     end
 
-    def handle_unauthorizes
+    def handle_unauthorized
       unless authorized?
         respond_to do |format|
           format.json { render :unauthorized, status: 401 }
